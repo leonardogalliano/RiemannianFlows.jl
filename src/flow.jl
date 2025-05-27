@@ -123,8 +123,8 @@ function integrate_augmented_flow(
         kwargs...
     )
     D = prod(shape)
-    x_t = [reshape(selectdim(u, 1, 1:D), shape) for u in sol.u]
-    logρ_t = [selectdim(u, 1, D+1:length(u)) for u in sol.u]
+    x_t = map(u -> reshape(selectdim(u, 1, 1:D), shape), sol.u)
+    logρ_t = map(u -> selectdim(u, 1, D+1:length(u)), sol.u)
     return sol.t, x_t, logρ_t
 end
 
