@@ -33,7 +33,8 @@ end
 # We also ensure that it stays in the tangent space (do we need this?)
 function velocity_field!(dx, x, p, t, flow::Flow)
     batch_size = get_batch_size(x, flow.manifold)
-    project!(flow.manifold^batch_size, dx, x, flow.velocity_field(x, p, t))
+    πx = project(flow.manifold^batch_size, x) # We do this or no??
+    project!(flow.manifold^batch_size, dx, πx, flow.velocity_field(πx, p, t))
     return nothing
 end
 
@@ -56,7 +57,8 @@ function integrate_flow(
     batch_size = get_batch_size(x₀, flow.manifold)
     is_point(flow.manifold^batch_size, x₀; error=:warn)
     prob = ODEProblem{true}((dx, x, p, t) -> velocity_field!(dx, x, p, t, flow), x₀, tspan, p)
-    sol = solve(prob, flow.args...; callback=projection_callback(flow.manifold, batch_size), save_everystep = save_everystep, flow.kwargs..., kwargs...)
+    # sol = solve(prob, flow.args...; callback=projection_callback(flow.manifold, batch_size), save_everystep = save_everystep, flow.kwargs..., kwargs...)
+    sol = solve(prob, flow.args...; save_everystep=save_everystep, flow.kwargs..., kwargs...)
     return sol
 end
 
@@ -117,7 +119,7 @@ function integrate_augmented_flow(
     sol = solve(
         prob,
         flow.args...;
-        callback=augmented_projection_callback(flow.manifold, batch_size, shape),
+        # callback=augmented_projection_callback(flow.manifold, batch_size, shape),
         save_everystep=save_everystep,
         flow.kwargs...,
         kwargs...

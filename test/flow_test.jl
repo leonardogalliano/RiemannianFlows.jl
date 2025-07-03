@@ -6,19 +6,19 @@ using BenchmarkTools
 using OrdinaryDiffEq
 using Zygote
 
-struct UniformSphere{M<:AbstractManifold}
-    manifold::M
+struct UniformSphere
+    d::Int
 end
 
 function RiemannianFlows.log_density(ν::UniformSphere, x::AbstractArray{T,n}) where {T,n}
-    return [-T(log(4π)) for _ in 1:RiemannianFlows.get_batch_size(x, ν.manifold)]
+    return [-T(log(2π^(ν.d / 2) / Manifolds.gamma(ν.d / 2))) for _ in 1:RiemannianFlows.get_batch_size(x, Manifolds.Sphere(ν.d))]
 end
 
 seed = 42
 rng = Xoshiro(seed)
 manifold = Sphere(2)
 d = prod(representation_size(manifold))
-ν₀ = UniformSphere(manifold)
+ν₀ = UniformSphere(d)
 velocity_field(x, p, t) = p * x
 flow = Flow(manifold, velocity_field, ν₀; args=(Tsit5(),))
 p = rand(Float32, d, d)

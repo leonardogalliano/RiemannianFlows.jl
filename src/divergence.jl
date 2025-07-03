@@ -10,12 +10,14 @@ struct EnzymeForwardDivergence <: DivergenceMethod end
 
 # WARNING: We still have to implement the curvature term if expressed in intrinsic coordinates
 function divergence_velocity_field(x, p, t, flow::Flow, ::ForwardDiffDivergence)
-    return tr(ForwardDiff.jacobian(x -> project(flow.manifold, x, flow.velocity_field(x, p, t)), x))
+    πx = project(flow.manifold, x)
+    return tr(ForwardDiff.jacobian(x -> project(flow.manifold, x, flow.velocity_field(x, p, t)), πx))
 end
 
 # WARNING: We still have to implement the curvature term if expressed in intrinsic coordinates
 function divergence_velocity_field(x, p, t, flow::Flow, ::EnzymeReverseDivergence)
-    return tr(Enzyme.jacobian(Enzyme.Reverse, x -> project(flow.manifold, x, flow.velocity_field(x, p, t)), x)[1])
+    πx = project(flow.manifold, x)
+    return tr(Enzyme.jacobian(Enzyme.Reverse, x -> project(flow.manifold, x, flow.velocity_field(x, p, t)), πx)[1])
 end
 
 function divergence_velocity_field_batched(x, p, t, flow::Flow, method::DivergenceMethod)
